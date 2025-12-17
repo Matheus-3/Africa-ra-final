@@ -1,0 +1,146 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    #example-scanning-overlay {
+      display: flex; align-items: center; justify-content: center;
+      position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+      background: transparent; z-index: 2;
+    }
+    .inner { position: relative; display: flex; align-items: center; justify-content: center; }
+    .scanline {
+      position: absolute; width: 100%; height: 10px; background: #fff;
+      animation: move 2s linear infinite;
+    }
+    @keyframes move { 0%,100%{top:0} 50%{top:calc(100% - 10px)} }
+
+    /* Fade suave */
+    .hidden {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.visible {
+  opacity: 1;
+  transition: opacity 1.2s ease;
+}
+  </style>
+</head>
+
+<body>
+  <!-- Overlay de Scaneamento -->
+  <div id="example-scanning-overlay">
+    <div class="inner">
+      <img src="./back-centro.png" style="width:40%;opacity:0.5;">
+      <div class="scanline"></div>
+    </div>
+  </div>
+
+  <!-- Cena AR -->
+  <a-scene mindar-image="uiScanning: #example-scanning-overlay; imageTargetSrc: ./target-alvo-africa.mind"
+           color-space="sRGB"
+           renderer="colorManagement: true, physicallyCorrectLights"
+           vr-mode-ui="enabled: false"
+           device-orientation-permission-ui="enabled: false"> 
+
+    <a-assets>
+      <a-asset-item id="model1" src="./african_elephant_planet_zoo.glb"></a-asset-item>
+      <a-asset-item id="model2" src="./giraffe_head-_shaking_animation.glb"></a-asset-item>
+      <a-asset-item id="model3" src="./lion.glb"></a-asset-item>
+      <a-asset-item id="model4" src="./hippo_downloadable_revised.glb"></a-asset-item>
+      <a-asset-item id="model5" src="./hyena.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera look-controls="enabled: false"></a-camera>
+
+    <!-- Alvo AR -->
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <!-- Container dos modelos -->
+      <a-entity id="object-container">
+
+        <!-- OBJETO 1 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="0.50 0.50 0.50" src="#model1"
+        ></a-gltf-model>
+
+        <!-- OBJETO 2 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="0.40 0.40 0.40" src="#model2"
+        ></a-gltf-model>
+
+        <!-- OBJETO 3 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="0.70 0.70 0.70" src="#model3"
+        ></a-gltf-model>
+
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 1" scale="0.40 0.40 0.40" src="#model4"
+        ></a-gltf-model>
+
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="4 4 4" src="#model5"
+        ></a-gltf-model>
+
+      </a-entity>
+
+    </a-entity>
+  </a-scene>
+
+
+  <!-- Script para alternar modelos -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const models = document.querySelectorAll("#object-container a-gltf-model");
+    let current = 0;
+    const DISPLAY_TIME = 5000; // 5 segundos
+    const FADE_TIME = 1200;    // deve bater com o CSS
+
+    // Inicialização
+    models.forEach((model, index) => {
+      if (index === 0) {
+        model.setAttribute("visible", true);
+        model.classList.add("visible");
+        model.classList.remove("hidden");
+      } else {
+        model.setAttribute("visible", false);
+        model.classList.add("hidden");
+      }
+    });
+
+    function switchModel() {
+      const currentModel = models[current];
+
+      // Fade OUT
+      currentModel.classList.remove("visible");
+      currentModel.classList.add("hidden");
+
+      setTimeout(() => {
+        currentModel.setAttribute("visible", false);
+
+        // Próximo modelo
+        current = (current + 1) % models.length;
+        const nextModel = models[current];
+
+        // Fade IN
+        nextModel.setAttribute("visible", true);
+        nextModel.classList.remove("hidden");
+        nextModel.classList.add("visible");
+
+      }, FADE_TIME);
+    }
+
+    setInterval(switchModel, DISPLAY_TIME);
+  });
+</script>
+
+</body>
+</html>
